@@ -32,10 +32,6 @@ envs = load_module_from_path('envs', os.path.join(ROOT_DIR, 'vllm', 'envs.py'))
 
 VLLM_TARGET_DEVICE = "cpu"
 
-# vLLM only supports Linux platform
-assert sys.platform.startswith(
-    "linux"), "vLLM only supports Linux platform (including WSL)."
-
 MAIN_CUDA_VERSION = "12.1"
 
 
