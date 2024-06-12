@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 #  which is not installed yet
 envs = load_module_from_path('envs', os.path.join(ROOT_DIR, 'vllm', 'envs.py'))
 
-VLLM_TARGET_DEVICE = envs.VLLM_TARGET_DEVICE
+VLLM_TARGET_DEVICE = "cpu"
 
 # vLLM only supports Linux platform
 assert sys.platform.startswith(
@@ -380,24 +380,6 @@ def get_requirements() -> List[str]:
     return requirements
 
 
-ext_modules = []
-
-if _is_cuda() or _is_hip():
-    ext_modules.append(CMakeExtension(name="vllm._moe_C"))
-
-if not _is_neuron():
-    ext_modules.append(CMakeExtension(name="vllm._C"))
-
-    if _install_punica():
-        ext_modules.append(CMakeExtension(name="vllm._punica_C"))
-
-package_data = {
-    "vllm": ["py.typed", "model_executor/layers/fused_moe/configs/*.json"]
-}
-if envs.VLLM_USE_PRECOMPILED:
-    ext_modules = []
-    package_data["vllm"].append("*.so")
-
 setup(
     name="vllm",
     version=get_vllm_version(),
@@ -423,11 +405,4 @@ setup(
     packages=find_packages(exclude=("benchmarks", "csrc", "docs", "examples",
                                     "tests*")),
     python_requires=">=3.8",
-    install_requires=get_requirements(),
-    ext_modules=ext_modules,
-    extras_require={
-        "tensorizer": ["tensorizer>=2.9.0"],
-    },
-    cmdclass={"build_ext": cmake_build_ext} if not _is_neuron() else {},
-    package_data=package_data,
 )
